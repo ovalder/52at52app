@@ -1,0 +1,44 @@
+[
+ {
+  "category": "Energy Gel",
+  "name": "Hūma Chia Energy Gel / Hūma Plus",
+  "verdict": "Gold Standard",
+  "price": "~$2.50 / gel",
+  "used_on": "Runs #7, #11, #14, #37, #38",
+  "note_en": "Absolute favorite race-day fuel. The fruit puree and chia seed base makes it extremely easy to swallow without throat irritation or gastric distress.",
+  "note_pt": "Absolute favorite race-day fuel. The fruit puree and chia seed base makes it extremely easy to swallow without throat irritation or gastric distress.",
+  "category_pt": "Energy Gel",
+  "name_pt": "Hūma Chia Energy Gel / Hūma Plus",
+  "verdict_pt": "Gold Standard",
+  "price_pt": "~$2.50 / gel",
+  "used_on_pt": "Runs #7, #11, #14, #37, #38"
+ },
+ {
+  "category": "Hydrogel Energy Gel",
+  "name": "Maurten Gel 100",
+  "verdict": "Approved",
+  "price": "~$3.75 / gel",
+  "used_on": "Run #37",
+  "note_en": "Hydrogel technology encapsulates carbs to pass smoothly through the stomach. Texture is like a firm gelatin dessert, unflavored/neutral, zero GI issues.",
+  "note_pt": "Hydrogel technology encapsulates carbs to pass smoothly through the stomach. Texture is like a firm gelatin dessert, unflavored/neutral, zero GI issues.",
+  "category_pt": "Hydrogel Energy Gel",
+  "name_pt": "Maurten Gel 100",
+  "verdict_pt": "Approved",
+  "price_pt": "~$3.75 / gel",
+  "used_on_pt": "Run #37"
+ },
+ {
+  "category": "Electrolyte Drink",
+  "name": "Nuun Sport Electrolyte Tablets",
+  "verdict": "Go-To Daily",
+  "price": "~$0.70 / tab",
+  "used_on": "Runs #26, #38, #40",
+  "note_en": "Carried in cold water bottles on the bike support crew. Essential for managing hydration and cramps during warm summer half-marathons.",
+  "note_pt": "Carried in cold water bottles on the bike support crew. Essential for managing hydration and cramps during warm summer half-marathons.",
+  "category_pt": "Electrolyte Drink",
+  "name_pt": "Nuun Sport Electrolyte Tablets",
+  "verdict_pt": "Go-To Daily",
+  "price_pt": "~$0.70 / tab",
+  "used_on_pt": "Runs #26, #38, #40"
+ }
+]

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Original 52@52 challenge</title>
+<link rel="canonical" href="https://52at52.app/archive/">
+<meta name="description" content="The original 52@52 half-marathon challenge, with its original stories, photographs and data.">
+<style>
+:root{color-scheme:light;--paper:#f7f5ef;--ink:#1d2321;--green:#287b58;--line:#deddd5}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{display:grid;grid-template-rows:auto minmax(0,1fr) auto;background:var(--paper);color:var(--ink);font:16px/1.5 system-ui,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 20px;border-bottom:1px solid var(--line)}
+header strong{font-size:16px}header a{color:var(--green);font-weight:650;text-decoration:none}
+a:focus-visible,summary:focus-visible{outline:3px solid var(--green);outline-offset:4px}
+main{min-height:0;position:relative;overflow:auto}
+iframe{display:block;width:100%;height:100%;border:0;background:#111827}
+iframe[hidden],[hidden]{display:none!important}
+.setup{max-width:760px;margin:clamp(24px,7vh,80px) auto;padding:24px}
+.setup h1{font-size:clamp(28px,5vw,44px);line-height:1.15;margin:0 0 20px}
+.setup p{max-width:64ch}
+code{overflow-wrap:anywhere;background:#e9e8e0;padding:2px 5px}
+.path{border:1px solid var(--line);padding:16px;margin:24px 0;overflow-wrap:anywhere}
+details{max-height:50dvh;overflow-y:auto;border-top:1px solid var(--line)}
+summary{padding:10px 20px;cursor:pointer;font-weight:650}
+.comments{max-width:760px;margin:0 auto;padding:0 20px 20px}
+@media(max-width:540px){header{padding:10px 12px;gap:8px;align-items:flex-start}header strong,header a{font-size:13px}.setup{margin:20px auto;padding:20px}}
+</style>
+</head>
+<body>
+<header>
+  <strong>52@52 <span data-en="· Original challenge" data-pt="· Desafio original">· Original challenge</span></strong>
+  <a href="../index.html" data-en="← Back to 52at52" data-pt="← Voltar ao 52at52">← Back to 52at52</a>
+</header>
+<main>
+  <section class="setup" id="archive-setup">
+    <h1 data-en="The original chapter." data-pt="O capítulo original.">The original chapter.</h1>
+    <p id="archive-status" role="status" data-en="Checking for the original website…" data-pt="Procurando o site original…">Checking for the original website…</p>
+    <div id="archive-copy-help" hidden>
+      <p data-en="Copy the public files from your old 52@52 website into this folder. Keep this viewer page where it is." data-pt="Copie os arquivos públicos do seu site antigo 52@52 para esta pasta. Mantenha esta página de visualização onde ela está.">Copy the public files from your old 52@52 website into this folder. Keep this viewer page where it is.</p>
+      <div class="path"><code>archive/original/index.html</code><br><code>archive/original/posts.json</code><br><code>archive/original/run_images.json</code><br><code>archive/original/media/</code><br><code>archive/original/posts/</code></div>
+      <p data-en="Copy the old index.html, public JSON files and all public folders, including summaries, tips, guides and data where present. Copy files, not an extra enclosing website folder. Do not copy .git, .github, private credentials or subscriber lists." data-pt="Copie o index.html antigo, os arquivos JSON públicos e todas as pastas públicas, incluindo summaries, tips, guides e data quando existirem. Copie os arquivos sem criar mais uma pasta externa. Não copie .git, .github, credenciais privadas ou listas de inscritos.">Copy the old index.html, public JSON files and all public folders, including summaries, tips, guides and data where present. Copy files, not an extra enclosing website folder. Do not copy .git, .github, private credentials or subscriber lists.</p>
+      <p data-en="After uploading those files, reload this page. Your original logo, stories and data will remain unchanged." data-pt="Depois de enviar esses arquivos, atualize esta página. Seu logotipo original, histórias e dados permanecerão intactos.">After uploading those files, reload this page. Your original logo, stories and data will remain unchanged.</p>
+    </div>
+  </section>
+  <iframe id="original-site" title="Original 52@52 website" hidden allow="fullscreen; picture-in-picture"></iframe>
+</main>
+<details>
+  <summary data-en="Comments about the original challenge" data-pt="Comentários sobre o desafio original">Comments about the original challenge</summary>
+  <section class="comments" data-comment-page="/archive/">
+    <h2 data-en="Comments" data-pt="Comentários">Comments</h2>
+    <p data-en="Comments reflect their authors' opinions. I am not responsible for other people's comments and may delete any I consider inappropriate." data-pt="Os comentários refletem a opinião de seus autores. Não me responsabilizo pelos comentários de outras pessoas e posso apagar qualquer comentário que considere inadequado.">Comments reflect their authors' opinions. I am not responsible for other people's comments and may delete any I consider inappropriate.</p>
+    <div id="giscus-slot"></div>
+  </section>
+</details>
+<script src="../assets/config.js"></script>
+<script>
+(function(){
+  // Match the new website's primary browser-language choice, without storing it.
+  var pt=/^pt\b/i.test((navigator.languages&&navigator.languages[0])||navigator.language||'en');
+  document.documentElement.lang=pt?'pt-BR':'en';
+  document.querySelectorAll('[data-en]').forEach(function(el){el.textContent=el.getAttribute(pt?'data-pt':'data-en');});
+  var status=document.getElementById('archive-status');
+  var setup=document.getElementById('archive-setup');
+  var frame=document.getElementById('original-site');
+  var originalBase=new URL('original/',location.href);
+  var observer;
+  // Preserve original files on disk. Normalize common old asset paths only in
+  // the viewer, including ../media in a fragment injected into the old homepage.
+  function archivedURL(value,base){
+    if(!value||/^(?:#|data:|blob:|mailto:|tel:|javascript:)/i.test(value))return null;
+    var url;
+    try{url=new URL(value,base);}catch(e){return null;}
+    if(url.origin===originalBase.origin&&url.pathname.indexOf(originalBase.pathname)===0)return null;
+    if(url.origin!==location.origin&&!/^(?:www\.)?52-at-52\.com$/i.test(url.hostname))return null;
+    var path=/^https?:\/\//i.test(value)?url.pathname:value;
+    path=path.replace(/^(?:\.{1,2}\/|\/)+/,'').replace(/^archive\/(?:original\/)?/,'');
+    if(!/^(?:(?:media|data|posts|summaries|tips|guides|assets|icons)\/|(?:posts|run_images)\.json(?:[?#]|$)|index\.html(?:[?#]|$))/i.test(path))return null;
+    if(/^https?:\/\//i.test(value))path+=url.search+url.hash;
+    return new URL(path,originalBase).href;
+  }
+  function keepOriginalLinksWorking(){
+    if(observer)observer.disconnect();
+    try{
+      var doc=frame.contentDocument,win=frame.contentWindow;
+      if(!doc||!win)return;
+      function repairLinks(){
+        doc.querySelectorAll('[src],[href],[poster]').forEach(function(el){
+          ['src','href','poster'].forEach(function(attr){
+            var fixed=archivedURL(el.getAttribute(attr),doc.baseURI);
+            if(fixed)el.setAttribute(attr,fixed);
+          });
+        });
+      }
+      repairLinks();
+      observer=new MutationObserver(repairLinks);
+      observer.observe(doc.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['src','href','poster']});
+      var originalFetch=win.fetch.bind(win);
+      win.fetch=function(input,options){
+        var fixed=(typeof input==='string'||input instanceof win.URL)
+          ?archivedURL(String(input),doc.baseURI):null;
+        return originalFetch(fixed||input,options);
+      };
+    }catch(e){/* External links may navigate the frame; the return bar still works. */}
+  }
+  function missing(message){
+    status.textContent=message||(pt?'O site original ainda não foi copiado.':'The original website has not been copied here yet.');
+    document.getElementById('archive-copy-help').hidden=false;
+  }
+  fetch('original/index.html',{cache:'no-store'}).then(function(response){
+    if(!response.ok)throw new Error('missing');
+    return response.text();
+  }).then(function(html){
+    if(!/<body\b/i.test(html)||/<header\b[^>]*class=["'][^"']*\btopbar\b/i.test(html)){
+      missing(pt?'Esta pasta não contém a página inicial do site original.':'This folder does not contain the original website homepage.');
+      return;
+    }
+    frame.addEventListener('load',function(){
+      frame.hidden=false;setup.hidden=true;
+      keepOriginalLinksWorking();
+    });
+    frame.src='original/index.html';
+  }).catch(function(){missing(location.protocol==='file:'
+    ?(pt?'Abra o site publicado para visualizar o arquivo.':'Open the hosted website to view the archive.')
+    :null);});
+})();
+</script>
+<script type="module" src="../assets/comments.js"></script>
+</body>
+</html>

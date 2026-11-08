@@ -1,0 +1,21 @@
+.comment-thread{max-width:760px;font:400 16px/1.6 Satoshi,system-ui,sans-serif;color:#1d2321}
+.comment-thread .comment-notice{padding:14px 18px;background:#eeeee5;border-radius:10px;color:#526154}
+.comment-thread label{display:block;font-weight:600;margin:16px 0 5px}
+.comment-thread input,.comment-thread textarea{box-sizing:border-box;width:100%;font:inherit;padding:12px;border:1px solid #cdd5cc;border-radius:10px;background:#fff;color:#1d2321}
+.comment-thread textarea{min-height:130px;resize:vertical}
+.comment-thread button,.comment-dialog button{font:600 14px/1.3 system-ui,sans-serif;border:0;border-radius:999px;background:#287b5e;color:#fff;padding:12px 20px;cursor:pointer}
+.comment-thread button:focus-visible,.comment-dialog button:focus-visible{outline:3px solid #ef5425;outline-offset:3px}
+.comment-thread button:disabled{opacity:.5;cursor:wait}
+.comment-thread .comment-reply{background:transparent;color:#287b5e;padding:6px 0}
+.comment-thread .comment-card{border-top:1px solid #dce1d9;padding:18px 0}
+.comment-thread .comment-card p{white-space:pre-wrap;overflow-wrap:anywhere;margin:8px 0}
+.comment-thread .comment-card time{font-size:12px;color:#68756b;margin-left:12px}
+.comment-thread .comment-children{padding-left:20px;border-left:2px solid #dce1d9}
+.comment-thread .comment-status{min-height:1.6em}
+.comment-thread .comment-replying{font-size:14px;color:#526154}
+.comment-thread .comment-trap{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+.comment-dialog{max-width:430px;width:calc(100% - 48px);box-sizing:border-box;border:1px solid #e0ded3;border-radius:18px;padding:28px;background:#f7f5ef;color:#1d2321;box-shadow:0 20px 80px #0003;font:400 16px/1.6 system-ui,sans-serif}
+.comment-dialog::backdrop{background:#11291f88}
+.comment-dialog h2{font-size:25px;margin:0 0 12px}
+.comment-dialog p{overflow-wrap:anywhere}
+.archive-comments{box-sizing:border-box;max-width:1000px;margin:40px auto;padding:28px;background:#f7f5ef;border-radius:12px;color:#1d2321;font-family:system-ui,sans-serif}

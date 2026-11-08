@@ -1,0 +1,22 @@
+# Private/local material must never be uploaded.
+_private/
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+.wrangler/
+node_modules/
+__pycache__/
+*.pyc
+tools/notify.ini
+**/subscribers.json
+**/.DS_Store
+Thumbs.db
+.52km-installed.json
+archive/original/_private/
+archive/original/.env
+archive/original/.env.*
+archive/original/.github/
+archive/original/content/
+archive/original/scripts/
+archive/original/tools/

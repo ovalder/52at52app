@@ -1,0 +1,12 @@
+name = "52at52-comments"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+
+[vars]
+ALLOWED_ORIGINS = "https://52at52.app"
+TURNSTILE_HOSTNAME = "52at52.app"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "52at52-comments"
+database_id = "REPLACE_WITH_YOUR_DATABASE_ID"

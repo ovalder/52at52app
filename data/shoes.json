@@ -1,0 +1,90 @@
+[
+ {
+  "name": "NB More Trail v3",
+  "use": "Trail",
+  "terrain": "Trail",
+  "drop": 4,
+  "stack": "",
+  "weight": "",
+  "mileage": "171.9 mi",
+  "status": "Retired",
+  "note": "Original challenge"
+ },
+ {
+  "name": "Topo Phantom 4",
+  "use": "Trail",
+  "terrain": "Trail",
+  "drop": 5,
+  "stack": "",
+  "weight": "",
+  "mileage": "173.1 mi",
+  "status": "Retired",
+  "note": "Original challenge"
+ },
+ {
+  "name": "Hoka Clifton 8",
+  "use": "Road",
+  "terrain": "Road",
+  "drop": 8,
+  "stack": "",
+  "weight": "",
+  "mileage": "80.0 mi",
+  "status": "Retired",
+  "note": "Original challenge"
+ },
+ {
+  "name": "Altra Rivera 3",
+  "use": "Road",
+  "terrain": "Road",
+  "drop": 0,
+  "stack": "",
+  "weight": "",
+  "mileage": "66.7 mi",
+  "status": "Retired",
+  "note": "Original challenge"
+ },
+ {
+  "name": "Altra Torin 8",
+  "use": "Road",
+  "terrain": "Road",
+  "drop": 0,
+  "stack": "",
+  "weight": "",
+  "mileage": "63.7 mi",
+  "status": "In rotation",
+  "note": "Original challenge"
+ },
+ {
+  "name": "Altra Wild 2",
+  "use": "Trail",
+  "terrain": "Trail",
+  "drop": 0,
+  "stack": "",
+  "weight": "",
+  "mileage": "56.5 mi",
+  "status": "Retired",
+  "note": "Original challenge"
+ },
+ {
+  "name": "Altra Escalante 4",
+  "use": "Road",
+  "terrain": "Road",
+  "drop": 0,
+  "stack": "",
+  "weight": "",
+  "mileage": "52.6 mi",
+  "status": "Retired",
+  "note": "Original challenge"
+ },
+ {
+  "name": "Altra Experience Wild 2",
+  "use": "Trail",
+  "terrain": "Trail",
+  "drop": 0,
+  "stack": "",
+  "weight": "",
+  "mileage": "40.1 mi",
+  "status": "In rotation",
+  "note": "Original challenge"
+ }
+]

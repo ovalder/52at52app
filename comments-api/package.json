@@ -1,0 +1,6 @@
+{
+  "name": "52at52-comments",
+  "private": true,
+  "type": "module",
+  "scripts": {"test": "node --test test-worker.js"}
+}

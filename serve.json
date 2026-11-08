@@ -1,0 +1,12 @@
+{
+  "cleanUrls": false,
+  "directoryListing": false,
+  "rewrites": [
+    {"source": "/", "destination": "/index.html"},
+    {"source": "/weeks", "destination": "/weeks/index.html"},
+    {"source": "/weeks/:slug([a-z0-9-]+)", "destination": "/weeks/:slug/index.html"},
+    {"source": "/activities/:slug", "destination": "/activities/:slug/index.html"},
+    {"source": "/tips/:slug", "destination": "/tips/:slug/index.html"},
+    {"source": "/reviews/:slug", "destination": "/reviews/:slug/index.html"}
+  ]
+}
