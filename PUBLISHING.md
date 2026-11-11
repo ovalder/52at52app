@@ -30,7 +30,10 @@ content/
 
 To add an activity: copy `content/activities/_template`, rename the copy
 (for example `Week 1 Activity 2`), fill in `activity.md`, and drop the photos in.
-`photos: NA` uses every image in the folder, sorted by file name.
+`photos: NA` uses every image in the folder, sorted by file name; a name starting
+with `_` comes first (cover photo). Rename a photo and publish the week again to
+change the order (re-publishing does not send new follow.it emails).
+The week page slideshows advance every 3 seconds (pausing on hover/touch).
 
 Publish (asks for the week number):
 

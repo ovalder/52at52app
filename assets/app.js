@@ -29,17 +29,40 @@
     b.addEventListener('click', function () { applyLang(b.dataset.lang); });
   });
 
-  // Photo slideshows on week pages (one per activity tile)
+  // Photo slideshows on week pages (one per activity tile).
+  // Advances every 3 s while visible; pauses on hover, touch or keyboard focus,
+  // and when the visitor prefers reduced motion.
+  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('[data-slideshow]').forEach(function (show) {
     var track = show.querySelector('.slides');
     var count = show.querySelector('.slide-count');
     var total = track.children.length;
+    var delay = parseInt(show.dataset.interval || '3000', 10);
+    var timer = null, visible = false, paused = false;
     function current() { return Math.round(track.scrollLeft / Math.max(1, track.clientWidth)); }
     function go(i) { track.scrollTo({left: ((i + total) % total) * track.clientWidth}); }
+    function stop() { clearInterval(timer); timer = null; }
+    function start() {
+      stop();
+      if (total > 1 && visible && !paused && !reduceMotion && !document.hidden)
+        timer = setInterval(function () { go(current() + 1); }, delay);
+    }
     var prev = show.querySelector('.prev'), next = show.querySelector('.next');
-    if (prev) prev.addEventListener('click', function () { go(current() - 1); });
-    if (next) next.addEventListener('click', function () { go(current() + 1); });
+    if (prev) prev.addEventListener('click', function () { go(current() - 1); start(); });
+    if (next) next.addEventListener('click', function () { go(current() + 1); start(); });
     track.addEventListener('scroll', function () { if (count) count.textContent = (current() + 1) + ' / ' + total; }, {passive: true});
+    show.addEventListener('mouseenter', function () { paused = true; stop(); });
+    show.addEventListener('mouseleave', function () { paused = false; start(); });
+    show.addEventListener('focusin', function () { paused = true; stop(); });
+    show.addEventListener('focusout', function () { paused = false; start(); });
+    track.addEventListener('touchstart', function () { stop(); }, {passive: true});
+    track.addEventListener('touchend', function () { setTimeout(start, 1500); }, {passive: true});
+    document.addEventListener('visibilitychange', start);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting; start();
+      }, {threshold: 0.5}).observe(show);
+    } else { visible = true; start(); }
   });
 
   // Navigation highlight

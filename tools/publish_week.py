@@ -99,6 +99,14 @@ def find_activity_folders(week_no):
     return sorted(found)
 
 
+def photo_order(name):
+    """Photo order on the page: names starting with "_" first (cover photo), then the
+    rest alphabetically, ignoring upper/lower case. Numbers sort naturally (2 before 10)."""
+    base = name.rsplit("/", 1)[-1].lower()
+    natural = [int(t) if t.isdigit() else t for t in re.split(r"(\d+)", base.lstrip("_"))]
+    return (not base.startswith("_"), natural)
+
+
 def process_photos(week_no, act_id, names, src_dir):
     out_dir = SITE / "media" / f"week-{week_no:02d}" / act_id
     if out_dir.exists(): shutil.rmtree(out_dir)          # re-publishing replaces old photos
@@ -173,9 +181,9 @@ def read_activity(week_no, number, folder):
 
     rec["youtube"] = [u.strip() for u in (a.get("youtube") or "").split(",") if not na(u)]
     if na(a.get("photos")):    # default: every image in the folder (and photos/), sorted by name
-        names = sorted(p.name if p.parent == folder else f"photos/{p.name}"
-                       for p in list(folder.iterdir()) + list((folder / "photos").glob("*"))
-                       if p.is_file() and p.suffix.lower() in IMG_EXT)
+        names = sorted((p.name if p.parent == folder else f"photos/{p.name}"
+                        for p in list(folder.iterdir()) + list((folder / "photos").glob("*"))
+                        if p.is_file() and p.suffix.lower() in IMG_EXT), key=photo_order)
     else:
         names = [p.strip() for p in a["photos"].split(",") if p.strip()]
     rec["photos"] = process_photos(week_no, rec["id"], names, folder)
