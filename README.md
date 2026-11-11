@@ -126,8 +126,8 @@ replies and owner deletion, follow `comments-api/README.md` and set the public
 service details in `assets/config.js`. The moderation page is `admin/comments.html`.
 Do not put private API tokens in frontend config.
 
-Email signup/notifications are also not connected. The form displays an honest
-setup message. Social URLs are blank rather than fake profile links; add your
+Email signup/notifications use follow.it (free) through `rss.xml`; see
+"Email subscribers (follow.it)" in `PUBLISHING.md` for the one-time setup. Social URLs are blank rather than fake profile links; add your
 actual profile URLs in `assets/config.js` if desired.
 
 ## Publishing future weeks

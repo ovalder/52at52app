@@ -66,6 +66,7 @@ def article(path, en_title, pt_title, en_body, pt_body=None, description="", dar
 <meta property="og:title" content="{title} · 52 at 52"><meta property="og:description" content="{esc(description)}">
 {image_meta}
 <meta name="twitter:card" content="{'summary_large_image' if image_meta else 'summary'}"><meta name="theme-color" content="#f7f5ef">
+<link rel="alternate" type="application/rss+xml" title="52 at 52" href="{PUBLIC}rss.xml">
 <link rel="manifest" href="{prefix}manifest.webmanifest">
 <link rel="apple-touch-icon" href="{prefix}icons/icon-192.png">
 <link rel="icon" href="{prefix}icons/icon-192.png">
@@ -314,6 +315,11 @@ def week_body(w, acts, scoring, lang):
                  f'<span class="ai-meta">{esc(kind)} · {num(a["distance_km"], lang)} km</span></span></a></li>')
     body += "</ol>"
     body += "".join(activity_tile(a, lang, len(acts)) for a in acts)
+    body += (f'<div class="subscribe week-follow"><h3>{"Receba um e-mail a cada nova atividade" if pt else "Get an email for every new activity"}</h3>'
+             f'<form class="sub-form"><input type="email" required placeholder="{"voce@email.com" if pt else "you@email.com"}" aria-label="Email">'
+             f'<button class="btn" type="submit">{"Inscrever-se" if pt else "Subscribe"}</button></form>'
+             f'<p class="muted subscribe-msg" role="status"></p>'
+             f'<p class="score-note">{"Grátis, via follow.it. Cancele quando quiser." if pt else "Free, via follow.it. Unsubscribe anytime."}</p></div>')
     return body
 
 
@@ -427,6 +433,78 @@ def build_reviews():
                 description=f"{review.get('product', '')}: {review['title_en']}")
 
 
+def rss_date(value):
+    """RFC 822 date for RSS. Accepts ISO date or datetime strings."""
+    from datetime import datetime, time, timezone
+    from email.utils import format_datetime
+    try:
+        d = datetime.fromisoformat(str(value))
+    except (TypeError, ValueError):
+        return None
+    if d.tzinfo is None:
+        d = d.replace(tzinfo=timezone.utc) if len(str(value)) > 10 else datetime.combine(d.date(), time(12), timezone.utc)
+    return format_datetime(d)
+
+
+def write_rss(site=None):
+    """rss.xml for follow.it (email notifications). One item per published activity,
+    one when a week reaches 52 credited km, plus summaries and reviews.
+    Items never change their guid, so re-publishing a week only notifies about NEW items."""
+    site = Path(site or SITE)
+    activities = read_data("activities")
+    weeks = {int(w["week"]): w for w in read_data("weeks")}
+    items = []
+
+    def add(guid, title, link, desc_html, when, image=None):
+        media = (f'<media:content url="{esc(image)}" medium="image"/>' if image else "")
+        items.append((when or "", f"<item><title>{esc(title)}</title><link>{esc(link)}</link>"
+                      f'<guid isPermaLink="false">{esc(guid)}</guid>'
+                      + (f"<pubDate>{rss_date(when)}</pubDate>" if rss_date(when) else "")
+                      + f"<description><![CDATA[{desc_html}]]></description>{media}</item>"))
+
+    for a in activities:
+        n = int(a["week"])
+        link = f"{PUBLIC}weeks/week-{n:02d}/#{safe_id(a['id'])}"
+        photo = next((u for u in a.get("photos") or [] if safe_media(u)), None)
+        kind = "Ride" if a["type"] == "ride" else "Run"
+        stats = f"{kind} · {a['distance_km']:g} km · {a.get('moving_time') or a.get('duration')}"
+        img = f'<p><img src="{esc(PUBLIC + photo)}" alt="" style="max-width:100%"></p>' if photo else ""
+        desc = (img + f"<p><b>{esc(stats)}</b></p>"
+                + (f"<p>{esc(a['summary_en'])}</p>" if clean_value(a.get("summary_en")) else "")
+                + (f"<p lang=\"pt-BR\">{esc(a['summary_pt'])}</p>" if clean_value(a.get("summary_pt")) else "")
+                + f'<p><a href="{esc(link)}">Read the full story / Leia a história completa</a></p>')
+        title = f"Week {n} · Activity {a.get('number', '')}: {activity_title(a, 'en')}"
+        add(f"52at52-activity-{a['id']}", title, link, desc,
+            a.get("published_at") or a.get("date"), PUBLIC + photo if photo else None)
+    for n, w in weeks.items():
+        if w.get("goal_met"):
+            link = f"{PUBLIC}weeks/week-{n:02d}/"
+            desc = (f"<p><b>✓ Week {n} complete: {w['credited_km']:g} / 52 credited km</b> "
+                    f"({w['total_km']:g} actual km across {w.get('activities')} activities).</p>"
+                    f"<p lang=\"pt-BR\">✓ Semana {n} cumprida: {num(w['credited_km'], 'pt')} / 52 km creditados.</p>"
+                    f'<p><a href="{esc(link)}">See the week / Veja a semana</a></p>')
+            add(f"52at52-week-{n:02d}-achieved", f"Week {n} complete! {w['credited_km']:g} / 52 km",
+                link, desc, w.get("goal_met_at") or w.get("end"))
+    for s in read_data("summaries"):
+        link = f"{PUBLIC}summaries/{safe_id(s['slug'])}/"
+        add(f"52at52-summary-{s['slug']}", s["title_en"], link,
+            f"<p>{esc(s.get('description_en', ''))}</p><p lang=\"pt-BR\">{esc(s.get('description_pt', ''))}</p>", s.get("date"))
+    for r in read_data("reviews"):
+        if not r.get("slug"): continue
+        link = f"{PUBLIC}reviews/{safe_id(r['slug'])}/"
+        add(f"52at52-review-{r['slug']}", f"Review: {r.get('title_en') or r['slug']}", link,
+            f"<p>{esc(r.get('product', ''))}</p>", r.get("published_at") or r.get("date"))
+    items.sort(key=lambda row: str(row[0]), reverse=True)
+    rss = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/"><channel>'
+           f"<title>52 at 52 · 52 km a week</title><link>{PUBLIC}</link>"
+           f'<atom:link href="{PUBLIC}rss.xml" rel="self" type="application/rss+xml"/>'
+           "<description>Season 2 of 52@52: 52 credited km every week (run km + ride km / 2). "
+           "New activities, completed weeks, summaries and reviews.</description><language>en</language>"
+           + "".join(xml for _, xml in items) + "</channel></rss>")
+    (site / "rss.xml").write_text(rss, encoding="utf-8")
+
+
 def build_all(site=None):
     global SITE
     if site is not None:
@@ -435,6 +513,7 @@ def build_all(site=None):
     build_weeks()
     build_reviews()
     build_summaries()
+    write_rss(SITE)
 
 
 if __name__ == "__main__":

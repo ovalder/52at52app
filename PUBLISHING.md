@@ -58,6 +58,27 @@ The goal is 52 CREDITED km: running km + cycling km / 2. Use `type: run` or
 `type: ride` and enter the ACTUAL distance, never a pre-divided bike distance.
 `moving_time` is required; `pace` is optional (blank = calculated from moving time).
 
+## Email subscribers (follow.it)
+
+Signup forms (home page and the bottom of every week page) send the email to
+follow.it, which opens a confirmation page in a new tab. follow.it reads
+`https://52at52.app/rss.xml`, which the publishing scripts rebuild every time.
+The feed gets one item per NEW activity, one when a week reaches 52 credited km,
+plus summaries and reviews. Re-publishing a week does not announce activities
+again: each item keeps its first-published time and a permanent ID.
+
+One-time setup, after this is pushed and live:
+
+1. Go to https://follow.it/publisher/create and enter `https://52at52.app/rss.xml`.
+2. Create your free publisher account and claim the feed, so you can see your
+   followers and statistics and set the sender name.
+3. Optional: if follow.it shows an "action URL" for your own form, paste it into
+   `assets/config.js` (`subscribe.action`). `https://api.follow.it/subscribe`
+   already works without it.
+
+Nothing else to run: after each publish + push, follow.it picks up the new items
+on its next check (not always immediately) and emails your followers.
+
 ## Reviews
 
 Copy `content/reviews/template/` to a new product slug folder, edit the Markdown,

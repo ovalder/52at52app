@@ -15,12 +15,12 @@ window.SITE_CONFIG = {
     category: "Comments",
     categoryId: ""
   },
-  // Optional public signup integration. Check the provider's current terms first.
-  // Never expose a private API key in this frontend.
+  // Email subscriptions through follow.it (reads https://52at52.app/rss.xml).
+  // "https://api.follow.it/subscribe" works right away (follow.it recognizes the site).
+  // After claiming the feed on follow.it you may paste your feed's own "action URL" here.
   subscribe: {
-    endpoint: "", // Public signup endpoint compatible with the form; not a secret API endpoint.
-    setupNoteEn: "Email subscriptions will be enabled once a subscription service is connected (see README).",
-    setupNotePt: "As inscrições por e-mail serão ativadas assim que um serviço de inscrições for conectado (veja o README)."
+    provider: "followit",
+    action: "https://api.follow.it/subscribe"
   },
   // Social profiles for the follow buttons on the home page
   social: {
