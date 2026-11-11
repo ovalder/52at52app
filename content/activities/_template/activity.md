@@ -35,7 +35,8 @@ HOW TO USE
 3. moving_time is required. pace: leave NA to calculate it from moving time,
    or type the value you want shown (e.g. 7:00, copied from Strava).
 4. Drop the photos into the folder (or a photos/ subfolder). photos: NA uses
-   every image, sorted by file name; or list them: photos: a.jpg, b.jpg
+   every image, sorted by file name, and names starting with "_" come first
+   (cover photo); or list them in your own order: photos: a.jpg, b.jpg
 5. Use NA for anything that doesn't apply; those lines are hidden on the site.
 6. Run:  py tools\publish_week.py   and type the week number.
 -->

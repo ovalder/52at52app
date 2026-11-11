@@ -29,6 +29,7 @@ photos: NA
 
 <!--
 photos: NA  = use EVERY image in this folder (and in a photos/ subfolder), sorted by file name.
+  Names starting with "_" come first (use it for the cover photo).
 To choose/order them yourself, list them instead:  photos: start.jpg, lake.jpg, finish.jpg
 -->
 
