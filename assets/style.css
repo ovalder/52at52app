@@ -196,3 +196,5 @@ a.tip-card{text-decoration:none;color:inherit}
 .wl-head{display:flex;gap:.8rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .wl-head b{font:800 1.3rem var(--display)}
 .week-list .meter-bar{height:10px}
+.week-follow{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:clamp(1.1rem,3vw,2rem);max-width:none;border-bottom:1px solid var(--line)}
+.week-follow h3{margin:0}

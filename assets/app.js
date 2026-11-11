@@ -57,30 +57,23 @@
     try { navigator.serviceWorker.register(new URL('sw.js', siteRoot)).catch(function () {}); } catch (e) {}
   }
 
-  // Subscribe form (free service endpoint configured in config.js)
-  var form = document.getElementById('subscribe-form');
-  if (form) {
-    form.addEventListener('submit', function (ev) {
-      ev.preventDefault();
-      var cfg = (window.SITE_CONFIG && window.SITE_CONFIG.subscribe) || {};
-      var email = form.querySelector('input[type=email]').value.trim();
-      var msg = document.getElementById('subscribe-msg');
-      if (!email) return;
-      if (!cfg.endpoint) {
-        msg.textContent = cfg.setupNoteEn || 'Subscriptions will be enabled once the free mailing service is configured.';
-        return;
-      }
-      fetch(cfg.endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ email: email })
-      }).then(function () {
-        msg.textContent = { en: 'Subscribed! Check your inbox to confirm.', pt: 'Inscrito! Confirme no seu e-mail.' }[LANG];
-      }).catch(function () {
-        msg.textContent = { en: 'Something went wrong — please try again.', pt: 'Algo deu errado — tente novamente.' }[LANG];
-      });
+  // Subscribe forms → follow.it (emails for every new activity / completed week)
+  document.querySelectorAll('.sub-form').forEach(function (form) {
+    var cfg = (window.SITE_CONFIG && window.SITE_CONFIG.subscribe) || {};
+    var msg = form.parentElement.querySelector('.subscribe-msg');
+    var input = form.querySelector('input[type=email]');
+    input.name = 'email';                       // follow.it expects a field named "email"
+    if (!cfg.action) return;
+    form.action = cfg.action;
+    form.method = 'post';
+    form.target = '_blank';                     // follow.it opens in a new tab to confirm
+    form.addEventListener('submit', function () {
+      if (msg) msg.textContent = LANG === 'pt'
+        ? 'Quase lá: confirme a inscrição na página do follow.it que abriu e depois no seu e-mail.'
+        : 'Almost there: confirm on the follow.it page that just opened, then in your inbox.';
+      setTimeout(function () { input.value = ''; }, 300);
     });
-  }
+  });
 
   // Comments (giscus) — only on pages that have the slot
   var slot = document.getElementById('giscus-slot');

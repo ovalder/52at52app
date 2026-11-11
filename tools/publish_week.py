@@ -15,6 +15,9 @@ week: each run simply replaces that week's page with the current state.
 
 Optional week intro/title: content/weeks/week-XX.md (see _template-week.md).
 
+Subscribers get emails through follow.it, which reads rss.xml (one item per
+new activity, plus one when the week reaches 52 credited km).
+
 Usage:  py tools/publish_week.py        (asks for the week number)
         py tools/publish_week.py 1
 Needs:  py -m pip install Pillow Markdown
@@ -22,7 +25,7 @@ Needs:  py -m pip install Pillow Markdown
 import json, re, shutil, sys
 from datetime import date, datetime, timedelta
 from build_pages import build_all, safe_id
-from project_paths import ROOT, SITE, CONTENT as SOURCES, PRIVATE, ensure_new_site
+from project_paths import ROOT, SITE, CONTENT as SOURCES, ensure_new_site
 from challenge_rules import credited_distance, score, week_score
 
 ACTIVITIES_DIR = SOURCES / "activities"
@@ -219,53 +222,6 @@ def save(p, data):
     p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def write_rss(weeks):
-    """Regenerates rss.xml from all published weeks (free RSS-to-email
-    services like Blogtrottr or follow.it can use it)."""
-    base = "https://52at52.app/"
-    items = []
-    for w in sorted(weeks, key=lambda w: w["week"], reverse=True):
-        title = w.get("title_en") or f"Week {w['week']}"
-        link = f"{base}weeks/week-{w['week']:02d}/"
-        desc = (f"{w['credited_km']:g} credited km / 52; {w['total_km']} actual km "
-                f"across {w['activities']} activities; "
-                f"goal {'achieved' if w['goal_met'] else 'in progress'}.")
-        items.append(f"<item><title>{title}</title><link>{link}</link><guid>{link}</guid>"
-                     f"<description>{desc}</description></item>")
-    rss = (f'<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>'
-           f"<title>52 at 52 - 52 km a Week</title><link>{base}</link>"
-           f"<description>52 credited km each week: run km + ride km / 2.</description>"
-           + "".join(items) + "</channel></rss>")
-    (SITE / "rss.xml").write_text(rss, encoding="utf-8")
-
-
-def notify_subscribers(summary):
-    """Optional: email subscribers. Configure _private/notify.ini and keep the list in
-    _private/subscribers.json (never commit these)."""
-    import smtplib
-    from email.mime.text import MIMEText
-    ini = PRIVATE / "notify.ini"; subs_file = PRIVATE / "subscribers.json"
-    if not ini.exists() or not subs_file.exists():
-        print("Email notification skipped (not configured)."); return
-    if input("Email subscribers about this update? (y/N): ").strip().lower() != "y":
-        print("Email notification skipped."); return
-    cfg = dict(re.findall(r"^(\w+)\s*=\s*(.+)$", ini.read_text(encoding="utf-8"), re.M))
-    subs = load(subs_file)
-    if not subs: print("Email notification skipped (subscriber list is empty)."); return
-    body = (f"Week {summary['week']} update: {summary['credited_km']:g} / 52 credited km "
-            f"across {summary['activities']} activities "
-            f"({'goal achieved!' if summary['goal_met'] else 'in progress'}).\n\n"
-            f"Read it: https://52at52.app/weeks/week-{summary['week']:02d}/\n\n"
-            "You receive this because you subscribed to 52 at 52. Unsubscribe anytime by replying.")
-    msg = MIMEText(body)
-    msg["Subject"] = f"52 at 52 - Week {summary['week']} update"
-    msg["From"] = cfg["from_email"]; msg["To"] = cfg["from_email"]
-    with smtplib.SMTP(cfg["smtp_host"], int(cfg.get("smtp_port", 587))) as s:
-        s.starttls(); s.login(cfg["username"], cfg["password"])
-        s.send_message(msg, to_addrs=[x["email"] if isinstance(x, dict) else x for x in subs])
-    print(f"Notification email sent to {len(subs)} subscriber(s).")
-
-
 def main():
     ensure_new_site()
     week_no = int(sys.argv[1]) if len(sys.argv) > 1 else int(input("Week number to publish: "))
@@ -285,6 +241,15 @@ def main():
     weeks = [w for w in load(DATA / "weeks.json") if w.get("week") != week_no] + [summary]
     for a in acts: a["credited_km"] = float(credited_distance(a))
     for w in weeks: w.update(week_score(w, acts))
+    # Keep the first-publication time of each activity / completed week, so the
+    # RSS feed (follow.it emails) only announces genuinely new items.
+    now = datetime.now().astimezone().isoformat(timespec="seconds")
+    before = {x["id"]: x for x in load(DATA / "activities.json")}
+    for r in records:
+        r["published_at"] = before.get(r["id"], {}).get("published_at") or now
+    old_week = next((w for w in load(DATA / "weeks.json") if w.get("week") == week_no), {})
+    if summary.get("goal_met"):
+        summary["goal_met_at"] = old_week.get("goal_met_at") or now
     ids = [safe_id(a["id"]) for a in acts]
     if len(set(ids)) != len(ids):
         sys.exit("Duplicate activity IDs. Give each activity a unique id:. JSON files were not changed.")
@@ -294,10 +259,15 @@ def main():
             shutil.rmtree(SITE / "activities" / safe_id(old["id"]), ignore_errors=True)
     save(DATA / "activities.json", sorted(acts, key=lambda a: (a["week"], a.get("number", 0), a["date"], a["id"])))
     save(DATA / "weeks.json", sorted(weeks, key=lambda w: w["week"]))
-    build_all(SITE)
-    write_rss(weeks)
-    try: notify_subscribers(summary)
-    except Exception as e: print(f"Email notification failed ({e.__class__.__name__}: {e}) — week is still published.")
+    build_all(SITE)                      # also rebuilds rss.xml for follow.it
+    new = [r for r in records if r["published_at"] == now]
+    if new or summary.get("goal_met_at") == now:
+        print("follow.it will email subscribers about: "
+              + ", ".join([f"Activity {r['number']}" for r in new]
+                          + (["Week complete"] if summary.get("goal_met_at") == now else []))
+              + " (after you push; follow.it checks the feed periodically).")
+    else:
+        print("No new activities: follow.it will not send a new email for this update.")
     print(f"\nWeek page: https://52at52.app/weeks/week-{week_no:02d}/")
     for r in records:
         print(f"  Activity {r['number']} link: https://52at52.app/activities/{r['id']}/  (opens the week page at that activity)")
