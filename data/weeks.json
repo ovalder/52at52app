@@ -6,23 +6,24 @@
     "title_en": null,
     "title_pt": null,
     "story": {},
-    "activities": 2,
-    "total_km": 62.99,
+    "activities": 3,
+    "total_km": 77.44,
     "km_by_type": {
       "run": 28.69,
-      "ride": 34.3
+      "ride": 48.75
     },
-    "seconds": 17645,
-    "elevation_m": 757,
-    "calories": 3340,
-    "updated": "2026-11-10 21:48",
-    "credited_km": 45.84,
+    "seconds": 20287,
+    "elevation_m": 869,
+    "calories": 3772,
+    "updated": "2026-11-11 12:34",
+    "credited_km": 53.065,
     "credited_km_by_type": {
       "run": 28.69,
-      "ride": 17.15
+      "ride": 24.375
     },
     "goal_km": 52,
-    "goal_met": false,
-    "scoring_rule": "run-1-ride-half-v1"
+    "goal_met": true,
+    "scoring_rule": "run-1-ride-half-v1",
+    "goal_met_at": "2026-11-11T12:34:55-08:00"
   }
 ]
