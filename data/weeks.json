@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "week": 1,
+    "start": "2026-11-07",
+    "end": "2026-11-13",
+    "title_en": null,
+    "title_pt": null,
+    "story": {},
+    "activities": 2,
+    "total_km": 62.99,
+    "km_by_type": {
+      "run": 28.69,
+      "ride": 34.3
+    },
+    "seconds": 17645,
+    "elevation_m": 757,
+    "calories": 3340,
+    "updated": "2026-11-10 21:16",
+    "credited_km": 45.84,
+    "credited_km_by_type": {
+      "run": 28.69,
+      "ride": 17.15
+    },
+    "goal_km": 52,
+    "goal_met": false,
+    "scoring_rule": "run-1-ride-half-v1"
+  }
+]
