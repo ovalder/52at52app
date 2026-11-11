@@ -1,10 +1,9 @@
-// Shared: language (browser-detected, not saved), nav highlight, PWA install, subscribe form, comments
+// Shared site behavior and activity media slideshows.
 (function () {
   'use strict';
   var LANG = 'en';
   var appScript = document.currentScript;
   var siteRoot = new URL('../', appScript.src);
-
   function applyLang(l) {
     LANG = l;
     document.documentElement.lang = l === 'pt' ? 'pt-BR' : 'en';
@@ -12,56 +11,127 @@
       var t = el.getAttribute('data-' + l);
       if (t !== null && t !== '') el.innerHTML = t;
     });
-    document.querySelectorAll('.lang button').forEach(function (b) {
-      b.setAttribute('aria-pressed', b.dataset.lang === l ? 'true' : 'false');
-    });
-    document.querySelectorAll('[data-language]').forEach(function (el) {
-      el.hidden = el.dataset.language !== l;
-    });
+    document.querySelectorAll('.lang button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.lang === l ? 'true' : 'false'); });
+    document.querySelectorAll('[data-language]').forEach(function (el) { el.hidden = el.dataset.language !== l; });
     var translatedTitle = document.querySelector('[data-page-title-' + l + ']');
     if (translatedTitle) document.title = translatedTitle.getAttribute('data-page-title-' + l) + ' · 52 at 52';
     document.dispatchEvent(new CustomEvent('site:language', {detail: l}));
-    loadComments(l); // reload comments in the new language
+    loadComments(l);
   }
   window.setLang = applyLang;
+  document.querySelectorAll('.lang button').forEach(function (b) { b.addEventListener('click', function () { applyLang(b.dataset.lang); }); });
 
-  document.querySelectorAll('.lang button').forEach(function (b) {
-    b.addEventListener('click', function () { applyLang(b.dataset.lang); });
+  // Enhance existing generated YouTube links; no page rebuild is needed.
+  function youtubeId(value) {
+    try {
+      var u = new URL(value), host = u.hostname.toLowerCase(), id = null;
+      if (u.protocol !== 'https:') return null;
+      if (host === 'youtu.be') id = u.pathname.split('/')[1];
+      else if (['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtube-nocookie.com', 'www.youtube-nocookie.com'].indexOf(host) !== -1) {
+        if (u.pathname === '/watch') id = u.searchParams.get('v');
+        else { var p = u.pathname.split('/'); if (['embed', 'shorts', 'live'].indexOf(p[1]) !== -1) id = p[2]; }
+      }
+      return /^[A-Za-z0-9_-]{11}$/.test(id || '') ? id : null;
+    } catch (e) { return null; }
+  }
+  document.querySelectorAll('.activity-tile').forEach(function (tile) {
+    var videos = [], seen = {};
+    tile.querySelectorAll('.tile-links a').forEach(function (link) {
+      var id = youtubeId(link.href);
+      if (id && !seen[id]) { videos.push(id); seen[id] = true; }
+    });
+    if (!videos.length) return;
+    var pt = !!tile.closest('[data-language=pt]');
+    var show = tile.querySelector('[data-slideshow]');
+    if (!show) {
+      show = document.createElement('div'); show.className = 'slideshow'; show.setAttribute('data-slideshow', '');
+      var slides = document.createElement('div'); slides.className = 'slides'; show.appendChild(slides);
+      var header = tile.querySelector('.tile-head');
+      if (header) header.insertAdjacentElement('afterend', show); else tile.prepend(show);
+    }
+    var track = show.querySelector('.slides');
+    videos.forEach(function (id, i) {
+      var figure = document.createElement('figure'); figure.dataset.videoId = id;
+      figure.style.position = 'relative'; figure.style.minWidth = '0';
+      var frame = document.createElement('iframe');
+      frame.title = (pt ? 'Vídeo da atividade ' : 'Activity video ') + (i + 1);
+      frame.style.cssText = 'width:100%;height:100%;border:0;display:block;min-width:0';
+      frame.allow = 'accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen';
+      frame.allowFullscreen = true; frame.referrerPolicy = 'strict-origin-when-cross-origin';
+      figure.appendChild(frame); track.appendChild(figure);
+    });
+    if (track.children.length > 1) {
+      ['prev', 'next'].forEach(function (direction) {
+        var button = show.querySelector('.' + direction);
+        if (!button) { button = document.createElement('button'); button.type = 'button'; button.className = 'slide-btn ' + direction; button.textContent = direction === 'prev' ? '‹' : '›'; show.appendChild(button); }
+        button.setAttribute('aria-label', direction === 'prev' ? (pt ? 'Mídia anterior' : 'Previous media') : (pt ? 'Próxima mídia' : 'Next media'));
+        // Keep navigation below the player instead of covering its controls.
+        button.style.top = 'auto'; button.style.bottom = '4px'; button.style.transform = 'none';
+      });
+      if (!show.querySelector('.slide-count')) { var count = document.createElement('span'); count.className = 'slide-count'; show.appendChild(count); }
+    }
+    show.style.paddingBottom = '52px';
+    var counter = show.querySelector('.slide-count');
+    if (counter) { counter.style.right = '50%'; counter.style.transform = 'translateX(50%)'; counter.style.bottom = '14px'; }
   });
 
-  // Photo slideshows on week pages (one per activity tile).
-  // Advances every 3 s while visible; pauses on hover, touch or keyboard focus,
-  // and when the visitor prefers reduced motion.
-  var reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Photos advance every 3 seconds; video slides wait for the visitor.
+  var motionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   document.querySelectorAll('[data-slideshow]').forEach(function (show) {
     var track = show.querySelector('.slides');
-    var count = show.querySelector('.slide-count');
-    var total = track.children.length;
+    if (!track || !track.children.length) return;
+    var count = show.querySelector('.slide-count'), total = track.children.length;
     var delay = parseInt(show.dataset.interval || '3000', 10);
-    var timer = null, visible = false, paused = false;
-    function current() { return Math.round(track.scrollLeft / Math.max(1, track.clientWidth)); }
-    function go(i) { track.scrollTo({left: ((i + total) % total) * track.clientWidth}); }
-    function stop() { clearInterval(timer); timer = null; }
+    var timer = null, visible = false, hovering = false, touching = false;
+    function current() { return Math.max(0, Math.min(total - 1, Math.round(track.scrollLeft / Math.max(1, track.clientWidth)))); }
+    function isVideo(i) { return !!track.children[i].dataset.videoId; }
+    function stop() { clearTimeout(timer); timer = null; }
+    function unloadVideos(except) {
+      Array.prototype.forEach.call(track.children, function (slide, i) {
+        var frame = slide.querySelector('iframe');
+        // Unloading stops audio reliably, without a global YouTube API dependency.
+        if (frame && i !== except && frame.hasAttribute('src')) frame.removeAttribute('src');
+      });
+    }
+    function syncVideo() {
+      var i = current();
+      var active = visible && !document.hidden && !!show.getClientRects().length;
+      unloadVideos(active ? i : -1);
+      if (active && isVideo(i)) {
+        var frame = track.children[i].querySelector('iframe');
+        if (!frame.hasAttribute('src')) frame.src = 'https://www.youtube-nocookie.com/embed/' + track.children[i].dataset.videoId + '?autoplay=0&playsinline=1';
+      }
+      if (count) count.textContent = (i + 1) + ' / ' + total;
+    }
     function start() {
-      stop();
-      if (total > 1 && visible && !paused && !reduceMotion && !document.hidden)
-        timer = setInterval(function () { go(current() + 1); }, delay);
+      stop(); syncVideo();
+      if (total > 1 && visible && !hovering && !touching && !show.contains(document.activeElement) && !(motionQuery && motionQuery.matches) && !document.hidden && show.getClientRects().length && !isVideo(current())) {
+        timer = setTimeout(function () { go(current() + 1); }, delay);
+      }
+    }
+    function go(i) {
+      stop(); unloadVideos(-1);
+      // Immediate snapping avoids loading a passing video during smooth scrolling.
+      track.scrollTo({left: ((i + total) % total) * track.clientWidth, behavior: 'instant'});
+      start();
     }
     var prev = show.querySelector('.prev'), next = show.querySelector('.next');
-    if (prev) prev.addEventListener('click', function () { go(current() - 1); start(); });
-    if (next) next.addEventListener('click', function () { go(current() + 1); start(); });
-    track.addEventListener('scroll', function () { if (count) count.textContent = (current() + 1) + ' / ' + total; }, {passive: true});
-    show.addEventListener('mouseenter', function () { paused = true; stop(); });
-    show.addEventListener('mouseleave', function () { paused = false; start(); });
-    show.addEventListener('focusin', function () { paused = true; stop(); });
-    show.addEventListener('focusout', function () { paused = false; start(); });
-    track.addEventListener('touchstart', function () { stop(); }, {passive: true});
-    track.addEventListener('touchend', function () { setTimeout(start, 1500); }, {passive: true});
+    if (prev) prev.addEventListener('click', function () { go(current() - 1); });
+    if (next) next.addEventListener('click', function () { go(current() + 1); });
+    track.addEventListener('scroll', start, {passive: true});
+    show.addEventListener('mouseenter', function () { hovering = true; stop(); });
+    show.addEventListener('mouseleave', function () { hovering = false; start(); });
+    show.addEventListener('focusin', stop);
+    show.addEventListener('focusout', function () { setTimeout(start, 0); });
+    track.addEventListener('touchstart', function () { touching = true; stop(); }, {passive: true});
+    function endTouch() { touching = false; start(); }
+    track.addEventListener('touchend', endTouch, {passive: true});
+    track.addEventListener('touchcancel', endTouch, {passive: true});
     document.addEventListener('visibilitychange', start);
+    document.addEventListener('site:language', start);
+    if (motionQuery && motionQuery.addEventListener) motionQuery.addEventListener('change', start);
     if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (entries) {
-        visible = entries[0].isIntersecting; start();
-      }, {threshold: 0.5}).observe(show);
+      new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting && entries[0].intersectionRatio >= 0.5; start(); }, {threshold: [0, 0.5]}).observe(show);
     } else { visible = true; start(); }
   });
 
@@ -74,22 +144,16 @@
         (target === 'reviews.html' && path.startsWith('reviews/')) ||
         (target === 'weeks/index.html' && /^(weeks|activities)\//.test(path))) a.classList.add('active');
   });
-
-  // PWA: register service worker (best effort)
   if ('serviceWorker' in navigator && location.protocol === 'https:') {
     try { navigator.serviceWorker.register(new URL('sw.js', siteRoot)).catch(function () {}); } catch (e) {}
   }
-
-  // Subscribe forms → follow.it (emails for every new activity / completed week)
   document.querySelectorAll('.sub-form').forEach(function (form) {
     var cfg = (window.SITE_CONFIG && window.SITE_CONFIG.subscribe) || {};
     var msg = form.parentElement.querySelector('.subscribe-msg');
     var input = form.querySelector('input[type=email]');
-    input.name = 'email';                       // follow.it expects a field named "email"
+    input.name = 'email';
     if (!cfg.action) return;
-    form.action = cfg.action;
-    form.method = 'post';
-    form.target = '_blank';                     // follow.it opens in a new tab to confirm
+    form.action = cfg.action; form.method = 'post'; form.target = '_blank';
     form.addEventListener('submit', function () {
       if (msg) msg.textContent = LANG === 'pt'
         ? 'Quase lá: confirme a inscrição na página do follow.it que abriu e depois no seu e-mail.'
@@ -97,27 +161,22 @@
       setTimeout(function () { input.value = ''; }, 300);
     });
   });
-
-  // Comments (giscus) — only on pages that have the slot
   var slot = document.getElementById('giscus-slot');
   function loadComments(l) {
-    if ((window.SITE_CONFIG?.comments || {}).provider !== "giscus") return;
+    if ((window.SITE_CONFIG?.comments || {}).provider !== 'giscus') return;
     slot = document.getElementById('giscus-slot');
     var g = (window.SITE_CONFIG || {}).giscus || {};
     if (!slot || !g.repoId || !g.categoryId) return;
     slot.innerHTML = '';
     var s = document.createElement('script');
     s.src = 'https://giscus.app/client.js'; s.async = true; s.crossOrigin = 'anonymous';
-    Object.entries({
-      repo: g.repo, 'repo-id': g.repoId, category: g.category, 'category-id': g.categoryId,
+    Object.entries({repo: g.repo, 'repo-id': g.repoId, category: g.category, 'category-id': g.categoryId,
       mapping: 'specific', term: publicURL(), 'reactions-enabled': '1', 'input-position': 'top', theme: 'light',
       lang: l === 'pt' ? 'pt' : 'en', loading: 'lazy'
     }).forEach(function (kv) { s.setAttribute('data-' + kv[0], kv[1]); });
     slot.appendChild(s);
   }
   window.loadComments = loadComments;
-
-  // Permanent public URL, independent of preview URLs or selected language.
   function publicURL() {
     var canonical = document.querySelector('link[rel="canonical"]');
     return canonical ? canonical.href : location.href.split('#')[0];
@@ -141,17 +200,13 @@
     var input = fallback.querySelector('input');
     function say(en, pt) { status.textContent = LANG === 'pt' ? pt : en; }
     function manualCopy() {
-      fallback.hidden = false;
-      input.value = publicURL();
-      input.focus();
-      input.select();
+      fallback.hidden = false; input.value = publicURL(); input.focus(); input.select();
       say('Select and copy the link below.', 'Selecione e copie o link abaixo.');
     }
     async function copyLink() {
       try {
         if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard unavailable');
-        await navigator.clipboard.writeText(publicURL());
-        fallback.hidden = true;
+        await navigator.clipboard.writeText(publicURL()); fallback.hidden = true;
         say('Link copied. Ready to share!', 'Link copiado. Pronto para compartilhar!');
       } catch (e) { manualCopy(); }
     }
@@ -161,13 +216,9 @@
       try {
         await navigator.share({title: document.title, url: publicURL()});
         say('Thanks for sharing!', 'Obrigado por compartilhar!');
-      } catch (e) {
-        if (e.name !== 'AbortError') await copyLink();
-      }
+      } catch (e) { if (e.name !== 'AbortError') await copyLink(); }
     });
   }
-
-  // Initial language from the browser (not saved)
   var initial = (navigator.language || '').toLowerCase().startsWith('pt') ? 'pt' : 'en';
   applyLang(initial);
 })();
