@@ -4,7 +4,7 @@ These scripts are for FUTURE content. They are not needed to unzip or install
 the clean-start website. Run them from the root folder containing `index.html`,
 `tools/`, and `content/`.
 
-## Weekly posts
+## Weekly posts (one folder per activity)
 
 Install the publishing dependencies once:
 
@@ -12,40 +12,51 @@ Install the publishing dependencies once:
 py -m pip install Pillow Markdown
 ```
 
-Edit `content/weeks/week-01/week.md`. The supplied activities are EXAMPLES;
-replace them before publishing. Add/remove `## Activity` blocks as needed,
-provide EN/PT stories, and put named photos beside the Markdown file or inside
-that week's `photos/` folder. Provide YouTube links for videos.
+Each activity has its own folder inside `content/activities/`, named
+`Week X Activity N`:
 
-Publish locally:
-
-```powershell
-py tools\publish_week.py 1
+```text
+content/
+  activities/
+    _template/activity.md          <- copy this folder for every new activity
+    Week 1 Activity 1/
+      activity.md                  <- stats + EN/PT story
+      IMG_0001.jpg, IMG_0002.jpg   <- photos (any names; or put them in photos/)
+    Week 1 Activity 2/
+      ...
+  weeks/
+    _template-week.md              <- OPTIONAL week title/intro (save as week-01.md)
 ```
 
-Review the printed totals, type `PUBLISH`, then review the generated pages.
-Use your normal GitHub commit/upload process to publish the changes online.
-The script does not push to GitHub. Optional email sending is skipped unless
-you have explicitly configured private SMTP settings and a subscriber list.
+To add an activity: copy `content/activities/_template`, rename the copy
+(for example `Week 1 Activity 2`), fill in `activity.md`, and drop the photos in.
+`photos: NA` uses every image in the folder, sorted by file name.
 
-For week 2, copy the source folder to `week-02`, update the front matter,
-dates and stable activity IDs, then run `py tools\publish_week.py 2`.
-Each week runs Saturday through Friday. Week 1 is November 7–13, 2026.
+Publish (asks for the week number):
+
+```powershell
+py tools\publish_week.py
+```
+
+The script collects every `Week X Activity N` folder for that week, shows the
+credited total, and after you type `PUBLISH` rebuilds the week page. You can run
+it after the first activity, after each new one, or only once at the end of the
+week: each run replaces the week page with the current state. When the week
+reaches 52 credited km the page shows "Weekly challenge achieved!".
+
+The week page has the week total and progress bar at the top, a list of the
+week's activities, then one tile per activity with its photo slideshow, stats
+and story. Comments at the bottom are for the whole week.
+`https://52at52.app/activities/w01-a1/` links open the week page at that activity.
+
+Activity IDs (`w01-a1`, ...) come from the folder name, so keep folder names
+stable once shared. Week dates are automatic: Saturday to Friday, Week 1 is
+November 7–13, 2026. Commit/push with your usual GitHub workflow afterwards; the
+script never pushes. Backups of the JSON data go to `_private/backups/`.
 
 The goal is 52 CREDITED km: running km + cycling km / 2. Use `type: run` or
-`type: ride`. Enter the ACTUAL distance, duration and elevation in the Markdown,
-never pre-divide a bike distance. For example, 52 km of cycling earns 26 credited
-km; 104 km of cycling or 26 km running + 52 km cycling meets the weekly goal.
-JSON keeps `total_km` and `distance_km` as actual distance, and adds `credited_km`
-for the score. Pace, speed, elevation and equipment mileage use actual activity data.
-
-Keep published activity IDs stable so shared URLs keep working after title
-changes. Week, activity and review pages have individual addresses and share
-controls. Do not publish placeholder activities as real results.
-
-The scripts recognize the clean-start root layout automatically. They update
-root `data/`, `media/`, `weeks/`, `activities/` and related new-site pages.
-They do not modify `archive/` or recalculate your old races.
+`type: ride` and enter the ACTUAL distance, never a pre-divided bike distance.
+`moving_time` is required; `pace` is optional (blank = calculated from moving time).
 
 ## Reviews
 

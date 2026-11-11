@@ -29,6 +29,19 @@
     b.addEventListener('click', function () { applyLang(b.dataset.lang); });
   });
 
+  // Photo slideshows on week pages (one per activity tile)
+  document.querySelectorAll('[data-slideshow]').forEach(function (show) {
+    var track = show.querySelector('.slides');
+    var count = show.querySelector('.slide-count');
+    var total = track.children.length;
+    function current() { return Math.round(track.scrollLeft / Math.max(1, track.clientWidth)); }
+    function go(i) { track.scrollTo({left: ((i + total) % total) * track.clientWidth}); }
+    var prev = show.querySelector('.prev'), next = show.querySelector('.next');
+    if (prev) prev.addEventListener('click', function () { go(current() - 1); });
+    if (next) next.addEventListener('click', function () { go(current() + 1); });
+    track.addEventListener('scroll', function () { if (count) count.textContent = (current() + 1) + ' / ' + total; }, {passive: true});
+  });
+
   // Navigation highlight
   var path = location.pathname.replace(siteRoot.pathname, '');
   document.querySelectorAll('.topbar nav a.site-link').forEach(function (a) {
