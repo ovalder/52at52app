@@ -1,8 +1,9 @@
 // Service worker: offline support for the app shell.
 // Cache-first for static assets, network-first for data (so new weeks show up).
-var CACHE = '52at52-logo-6d060f936c50cd2c-season-two-autoplay-v4';
+var CACHE = '52at52-logo-6d060f936c50cd2c-season-two-summary-v1';
 var PRECACHE = [
   './', 'index.html', 'tips.html', 'reviews.html', 'summaries/index.html', 'summaries/season-two/index.html',
+  'summaries/season-two-the-challenge-continues/index.html',
   'assets/brand-shield.png', 'assets/style.css', 'assets/app.js', 'assets/config.js',
   'assets/comments.js', 'assets/comments.css', 'assets/comment-policy.js',
   'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'

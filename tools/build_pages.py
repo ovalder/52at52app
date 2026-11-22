@@ -82,7 +82,6 @@ def article(path, en_title, pt_title, en_body, pt_body=None, description="", dar
 <div class="lang" role="group" aria-label="Language"><button data-lang="en" aria-pressed="true">EN</button>
 <button data-lang="pt" aria-pressed="false">PT</button></div></nav></header>
 <main><section class="page-head">
-<p class="breadcrumb"><a href="{prefix}index.html">{bi("Challenge home", "Início do desafio")}</a></p>
 <h1 data-page-title-en="{esc(en_title)}" data-page-title-pt="{esc(pt_title)}">{bi(esc(en_title), esc(pt_title))}</h1>
 {body}</section>
 <section class="comments"><h2>{bi("Comments", "Comentários")}</h2>
@@ -90,7 +89,7 @@ def article(path, en_title, pt_title, en_body, pt_body=None, description="", dar
     "Comments reflect their authors' opinions. I am not responsible for others' comments and may delete any comment I consider inappropriate at my sole discretion.",
     "Os comentários refletem a opinião de seus autores. Não me responsabilizo pelos comentários de outras pessoas e posso apagar qualquer comentário que considere inadequado, a meu exclusivo critério."
 )}</p><div id="giscus-slot"></div></section></main>
-<footer class="foot"><span>52 at 52 · San Jose, CA</span><a href="{prefix}index.html">{bi("Challenge home", "Início do desafio")}</a></footer>
+<footer class="foot"><span>52 at 52 · San Jose, CA</span></footer>
 <script src="{prefix}assets/config.js"></script><script src="{prefix}assets/app.js"></script>
 <script type="module" src="{prefix}assets/comments.js"></script>
 </body></html>"""
@@ -400,6 +399,10 @@ def build_summaries():
     entries = sorted(read_data("summaries"), key=lambda s: s["date"], reverse=True)
     for entry in entries:
         slug = safe_id(entry["slug"])
+        if entry.get("static_html"):
+            if not (SITE / "summaries" / slug / "index.html").is_file():
+                raise FileNotFoundError(f"Missing static summary page: {slug}")
+            continue
         bodies = []
         for lang in ("en", "pt"):
             source = ROOT / "content" / "summaries" / slug / f"{lang}.md"
@@ -486,6 +489,8 @@ def write_rss(site=None):
             add(f"52at52-week-{n:02d}-achieved", f"Week {n} complete! {w['credited_km']:g} / 52 km",
                 link, desc, w.get("goal_met_at") or w.get("end"))
     for s in read_data("summaries"):
+        if s.get("include_in_feed") is False:
+            continue
         link = f"{PUBLIC}summaries/{safe_id(s['slug'])}/"
         add(f"52at52-summary-{s['slug']}", s["title_en"], link,
             f"<p>{esc(s.get('description_en', ''))}</p><p lang=\"pt-BR\">{esc(s.get('description_pt', ''))}</p>", s.get("date"))
