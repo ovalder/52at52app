@@ -3,6 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  (async function () {
+    // Leave direct links to the overview or comments on this page.
+    if (location.hash) return;
+    try {
+      const response = await fetch('data/weeks.json', { cache: 'no-cache' });
+      if (!response.ok) return;
+      const weeks = await response.json();
+      if (!Array.isArray(weeks)) return;
+      const latest = weeks.reduce(function (highest, entry) {
+        const number = entry && entry.week;
+        return Number.isInteger(number) && number > highest ? number : highest;
+      }, 0);
+      if (latest && !location.hash) {
+        const path = 'weeks/week-' + String(latest).padStart(2, '0') + '/index.html';
+        location.replace(path + location.search);
+      }
+    } catch {
+      // The overview remains usable if the week list can't be loaded.
+    }
+  })();
+</script>
 <title>52 at 52 · 52 km a Week</title>
 <link rel="canonical" href="https://52at52.app/">
 <meta property="og:title" content="52 at 52 · 52 km a Week">
@@ -36,7 +58,7 @@
   </nav>
 </header>
 
-<main>
+<main id="overview">
   <section class="hero">
     <p class="eyebrow txt" data-en="Season two · Starts on Nov 7, 2026" data-pt="Temporada dois · Começa em 7 de novembro de 2026">Season two · Starts on Nov 7, 2026</p>
     <h1 class="txt" data-en="52 kilometers.<br>Every week.<br><em>Any way I can.</em>" data-pt="52 quilômetros.<br>Toda semana.<br><em>Do jeito que der.</em>">52 kilometers.<br>Every week.<br><em>Any way I can.</em></h1>
