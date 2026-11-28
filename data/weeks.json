@@ -51,5 +51,31 @@
     "goal_met": true,
     "scoring_rule": "run-1-ride-half-v1",
     "goal_met_at": "2026-11-22T00:37:29-03:00"
+  },
+  {
+    "week": 3,
+    "start": "2026-11-21",
+    "end": "2026-11-27",
+    "title_en": null,
+    "title_pt": null,
+    "story": {},
+    "activities": 4,
+    "total_km": 52.89,
+    "km_by_type": {
+      "run": 52.89
+    },
+    "seconds": 20065,
+    "elevation_m": 46,
+    "calories": 4333,
+    "updated": "2026-11-27 22:18",
+    "credited_km": 52.89,
+    "credited_km_by_type": {
+      "run": 52.89,
+      "ride": 0.0
+    },
+    "goal_km": 52,
+    "goal_met": true,
+    "scoring_rule": "run-1-ride-half-v1",
+    "goal_met_at": "2026-11-27T22:18:42-03:00"
   }
 ]
