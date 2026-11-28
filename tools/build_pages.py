@@ -71,7 +71,7 @@ def article(path, en_title, pt_title, en_body, pt_body=None, description="", dar
 <link rel="apple-touch-icon" href="{prefix}icons/icon-192.png">
 <link rel="icon" href="{prefix}icons/icon-192.png">
 <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800&amp;f[]=satoshi@400,500,700&amp;display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{prefix}assets/style.css">
+<link rel="stylesheet" href="{prefix}assets/style.css?v=2">
 </head><body>
 <header class="topbar"><a class="brand" href="{prefix}index.html" aria-label="52 at 52 home"><img src="{prefix}assets/brand-shield.png" alt="" width="48" height="46" style="width:48px;height:46px;object-fit:contain;vertical-align:middle;margin-right:8px">52<span>at</span>52 <small>km/week</small></a>
 <nav><a class="site-link" href="{prefix}summaries/index.html">{bi("Summary", "Resumos")}</a>
