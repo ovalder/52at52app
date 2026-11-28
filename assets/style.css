@@ -185,8 +185,9 @@ a.tip-card{text-decoration:none;color:inherit}
 .slideshow{position:relative;margin:1.2rem 0;border-radius:14px;overflow:hidden;background:#111}
 .slides{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;scroll-behavior:smooth}
 .slides::-webkit-scrollbar{display:none}
-.slides figure{flex:0 0 100%;margin:0;scroll-snap-align:center;display:grid;place-items:center;aspect-ratio:4/3;max-height:72vh}
-.slides img{width:100%;height:100%;object-fit:contain;display:block}
+.slides figure{flex:0 0 100%;margin:0;scroll-snap-align:center;position:relative;display:block;aspect-ratio:4/3;max-height:72vh}
+.slides figure>a{display:contents}
+.slides img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
 .slide-btn{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.88);color:var(--ink);font:700 1.6rem/1 var(--body);cursor:pointer}
 .slide-btn.prev{left:.6rem}.slide-btn.next{right:.6rem}
 .slide-count{position:absolute;right:.7rem;bottom:.6rem;background:rgba(0,0,0,.6);color:#fff;font-size:.8rem;padding:.15rem .55rem;border-radius:999px}
